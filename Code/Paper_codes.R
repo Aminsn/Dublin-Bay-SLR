@@ -1,4 +1,3 @@
-rm(list = ls())
 library(ggpubr)
 library(readr)
 library(zoo)
@@ -14,30 +13,29 @@ require(ggmap)
 
 # ======================== Reading data + fixes  ======================== 
 #Part I
-dub.highs = read.csv('Dublin_Bay_Project-master/All_data.csv')
-dub.long <- read.csv('Dublin_Bay_Project-master/Digitised_1990_2001_GDM.csv',header=TRUE)
-dub.ntgn = read.csv('Dublin_Bay_Project-master/dub_mon_2007_to_2018.csv',header=TRUE)
-dub.andy = read.csv('Dublin_Bay_Project-master/dub_mon_2002_to_2010.csv',header=TRUE)
+dub.highs = read.csv('All_data.csv')
+dub.long <- read.csv('Digitised_1990_2001_GDM.csv',header=TRUE)
+dub.ntgn = read.csv('dub_mon_2007_to_2018.csv',header=TRUE)
+dub.andy = read.csv('dub_mon_2002_to_2010.csv',header=TRUE)
 
-howth_harbour <- read_csv("Dublin_Bay_Project-master/howth_harbour.csv")
+howth_harbour <- read_csv("howth_harbour.csv")
 
-arklow <- read.delim("Dublin_Bay_Project-master/arklow.txt", stringsAsFactors=FALSE)
+arklow <- read.delim("arklow.txt", stringsAsFactors=FALSE)
 arklow <- arklow %>% select(-Quality) %>% 
   mutate(time = as.POSIXct(time, format = "%Y/%m/%d %H:%M:%S", tz = "UTC"))
 
-dub_mon = read_csv('Dublin_Bay_Project-master/dub_mon_1987_to_2017.csv')
+dub_mon = read_csv('dub_mon_1987_to_2017.csv')
 
 #Part II
-brest_hour <- read_csv("Dublin_Bay_Project-master/Brest hourly.csv")
-newlyn_hour <- read_csv("Dublin_Bay_Project-master/Newlyn hourly.csv")
-dub_ann = read_csv('Dublin_Bay_Project-master/dub_ann_1938_to_2017.csv')
-irish_sea <- read_csv("IrishSeaComplete.csv")
-irish_sea_2 <- irish_sea %>% #This is for extracting newlyn and brest MSL
-  group_by(year = floor(time)) %>% 
-  summarise_at(vars(bangor:north_shields), mean, na.rm = TRUE) 
+brest_hour <- read_csv("Brest hourly.csv")
+newlyn_hour <- read_csv("Newlyn hourly.csv")
+dub_ann = read_csv('dub_ann_1938_to_2017.csv')
+newlyn_brest <- read_csv("newlyn_brest.csv") %>%  # Extracting newlyn and brest MSL
+  group_by(year = floor(year)) %>% 
+  summarise_all(mean, na.rm = TRUE) 
 
 #Part III
-dly532 <- read_csv("~/Sea Level Analysis/Dublin_Bay_Project-master/dly532.csv")
+dly532 <- read_csv("dly532.csv")
 atmosphere_data <- read_csv("atmosphere_data.csv")
 p0_data <- read_csv("NCEP_global_pressure.csv")
 p0_data <- p0_data %>% dplyr::select(Year, p0) %>% rename(year = Year) %>% filter(year < 2017)
@@ -85,11 +83,11 @@ dub.long %>% dplyr::select(dyear, long.mw = mhw) %>%
   theme(
     axis.text.x = element_text(size = 10, face = "bold", margin = margin(t = 6)),
     axis.text.y = element_text(size = 10, face = "bold", margin = margin(t = 6)),
-    legend.text = element_text( family = "Serif",size = 10, face = "bold"),
+    legend.text = element_text( family = "Arial",size = 10, face = "bold"),
     legend.title = element_text(size = 15, face = "bold"),
     legend.box.margin = margin(1, 20, 1, 1),
-    axis.title.y = element_text(family = "Serif",size = 10, face = "bold"),
-    axis.title.x = element_text(family = "Serif",size = 10, face = "bold"))
+    axis.title.y = element_text(family = "Arial",size = 10, face = "bold"),
+    axis.title.x = element_text(family = "Arial",size = 10, face = "bold"))
 
 # ================ Mapping Dublin, Arklow and Howth Locations =================== 
 
@@ -117,17 +115,17 @@ bigger_map <- map1 +
   annotate(geom = "text", x = -7.8, y = 53.32, label = "Ireland", 
            color = "grey22", size = 3.5) +
   annotate(geom = "text", x = -5.54, y = 49.575, label = "Newlyn", 
-           fontface="bold",family= "Serif",size = 4,color = "#A01502") +
+           fontface="bold",family= "Arial",size = 4,color = "#A01502") +
   annotate(geom = "text", x = -4.49, y = 47.845, label = "Brest", 
-           fontface="bold",family= "Serif",size = 4,color = "#A01502") +
+           fontface="bold",family= "Arial",size = 4,color = "#A01502") +
   geom_rect(xmin = -6.5, ymin = 52.5, xmax = -5.6, ymax = 53.6, fill = NA,  colour = "black",
             size = 0.6) + 
   theme(legend.position="bottom", axis.text = element_text(size = rel(0.75)), 
         legend.key = element_rect(colour = "white"), 
-        axis.text.x = element_text( vjust=0.5, size = 10, family = "Serif"),
-        axis.text.y = element_text( size = 10, family = "Serif"),
-        axis.title.x = element_text(family = "Serif"),
-        axis.title.y = element_text(family = "Serif"))
+        axis.text.x = element_text( vjust=0.5, size = 10, family = "Arial"),
+        axis.text.y = element_text( size = 10, family = "Arial"),
+        axis.title.x = element_text(family = "Arial"),
+        axis.title.y = element_text(family = "Arial"))
 
 
 base2 = get_stamenmap(c(-6.397, 52.75, -5.894, 53.426), zoom=10, maptype="terrain-background")
@@ -136,20 +134,20 @@ base2 = get_stamenmap(c(-6.397, 52.75, -5.894, 53.426), zoom=10, maptype="terrai
 smaller_map <- map2 + geom_point(data=locs2, aes(x=lon_dec, y=lat_dec), shape= "square" ,color="#A01502", cex=4) + # plot the points
   labs(x="", y="") + # label the axes
   annotate(geom = "text",x=-6.138,
-           y=52.771,label="Arklow", fontface="bold",family= "Serif",size = 4,color = "#A01502") +
+           y=52.771,label="Arklow", fontface="bold",family= "Arial",size = 4,color = "#A01502") +
   annotate(geom = "text",x=-6.2,
-           y=53.32,label="Dublin Port", fontface="bold", family= "Serif", size = 4,color = "#A01502") +
+           y=53.32,label="Dublin Port", fontface="bold", family= "Arial", size = 4,color = "#A01502") +
   annotate(geom = "text",x=-6.05,
-           y=53.37,label="Howth Harbour", fontface="bold",family= "Serif", size = 4,color = "#A01502") +
+           y=53.37,label="Howth Harbour", fontface="bold",family= "Arial", size = 4,color = "#A01502") +
   annotate(geom = "text", x = -5.95, y = 53.2, label = "Irish Sea", 
            color = "grey22", size = 4, angle = 90) +
   theme_bw() + 
   theme(legend.position="bottom", axis.text = element_text(size = rel(0.75)), 
         legend.key = element_rect(colour = "white"), 
-        axis.text.x = element_text( vjust=0.5, size = 10, family = "Serif"),
-        axis.text.y = element_text( size = 10, family = "Serif"),
-        axis.title.x = element_text(family = "Serif"),
-        axis.title.y = element_text(family = "Serif"))
+        axis.text.x = element_text( vjust=0.5, size = 10, family = "Arial"),
+        axis.text.y = element_text( size = 10, family = "Arial"),
+        axis.title.x = element_text(family = "Arial"),
+        axis.title.y = element_text(family = "Arial"))
 
 arrow_up <- data.frame(x1 = 14.1, x2 = 7.8, y1 = 11.05, y2 = 16.91)
 arrow_down <- data.frame(x1 = 14.1, x2 = 7.8, y1 = 9.67,  y2 =  3.12 )
@@ -236,7 +234,7 @@ dub_how_ark_monthly <- dublin_monthly %>% select(-dyear) %>%
 # ======================== Plotting Dublin VS Howth ======================== 
 # ======================== MLW
 dublin_geom_smooth <- dublin_monthly %>% filter(time >= min(howth_monthly$time)) #Matching time intervals
-p1 <- dub_how_ark_monthly %>% filter(Location == "Dublin_mlw" |
+p_1_1 <- dub_how_ark_monthly %>% filter(Location == "Dublin_mlw" |
                                        Location == "Howth_mlw" ,
                                      time >= min(howth_monthly$time)) %>%
   mutate(Location = as.factor(Location)) %>% 
@@ -254,15 +252,15 @@ p1 <- dub_how_ark_monthly %>% filter(Location == "Dublin_mlw" |
   theme(
     axis.text.x = element_text(size = 10, angle = 45, face = "bold", margin = margin(t = 6)),
     axis.text.y = element_text(size = 10, face = "bold", margin = margin(t = 6)),
-    legend.text = element_text(family = "Serif",size = 10, face = "bold"),
+    legend.text = element_text(family = "Arial",size = 10, face = "bold"),
     legend.title = element_text(size = 15, face = "bold"),
     legend.spacing.x = unit(1,"cm"),
-    axis.title.y = element_text(family = "Serif",size = 10, face = "bold"),
-    axis.title.x = element_text(family = "Serif",size = 10, face = "bold", 
+    axis.title.y = element_text(family = "Arial",size = 10, face = "bold"),
+    axis.title.x = element_text(family = "Arial",size = 10, face = "bold", 
                                 margin = margin(t = 10, r = 0, b = 0, l = 0)))
 
 # ======================== MSL
-p2 <- dub_how_ark_monthly %>% filter(Location == "Dublin_msl" |
+p_1_2 <- dub_how_ark_monthly %>% filter(Location == "Dublin_msl" |
                                        Location == "Howth_msl" ,
                                      time >= min(howth_monthly$time)) %>%
   mutate(Location = as.factor(Location)) %>% 
@@ -279,14 +277,14 @@ p2 <- dub_how_ark_monthly %>% filter(Location == "Dublin_msl" |
   theme(
     axis.text.x = element_text(size = 10, face = "bold", margin = margin(t = 6)),
     axis.text.y = element_text(size = 10, face = "bold", margin = margin(t = 6)),
-    legend.text = element_text( family = "Serif",size = 10, face = "bold"),
+    legend.text = element_text( family = "Arial",size = 10, face = "bold"),
     legend.title = element_text(size = 15, face = "bold"),
     legend.box.margin = margin(1, 20, 1, 1),
-    axis.title.y = element_text(family = "Serif",size = 10, face = "bold"),
-    axis.title.x = element_text(family = "Serif",size = 10, face = "bold"))
+    axis.title.y = element_text(family = "Arial",size = 10, face = "bold"),
+    axis.title.x = element_text(family = "Arial",size = 10, face = "bold"))
 
 # ======================== MHW
-p3 <- dub_how_ark_monthly %>% filter(Location == "Dublin_mhw" |
+p_1_3 <- dub_how_ark_monthly %>% filter(Location == "Dublin_mhw" |
                                        Location == "Howth_mhw" ,
                                      time >= min(howth_monthly$time)) %>%
   mutate(Location = as.factor(Location)) %>% 
@@ -304,19 +302,19 @@ p3 <- dub_how_ark_monthly %>% filter(Location == "Dublin_mhw" |
   theme(
     axis.text.x = element_text(size = 10, face = "bold", margin = margin(t = 6)),
     axis.text.y = element_text(size = 10, face = "bold", margin = margin(t = 6)),
-    legend.text = element_text(family = "Serif",size = 10, face = "bold"),
+    legend.text = element_text(family = "Arial",size = 10, face = "bold"),
     legend.title = element_text(size = 15, face = "bold"),
     legend.box.margin = margin(1, 20, 1, 1),
-    axis.title.y = element_text(family = "Serif",size = 10, face = "bold"),
-    axis.title.x = element_text(family = "Serif",size = 10, face = "bold"))
+    axis.title.y = element_text(family = "Arial",size = 10, face = "bold"),
+    axis.title.x = element_text(family = "Arial",size = 10, face = "bold"))
 
-fig_dub_howth <- ggarrange(p3 + rremove("x.text"), p2 + rremove("x.text"), p1 , 
+fig_dub_howth <- ggarrange(p_1_3 + rremove("x.text"), p_1_2 + rremove("x.text"), p_1_1 , 
                            ncol = 1, nrow = 3,
                            common.legend = TRUE, legend = "top")
 
 # ======================== Plotting Dublin VS Arklow ======================== 
 # ======================== MLW
-p1 <- dub_how_ark_monthly %>% filter(Location == "Dublin_mlw" |
+p_2_1 <- dub_how_ark_monthly %>% filter(Location == "Dublin_mlw" |
                                        Location == "Arklow_mlw") %>%
   mutate(Location = as.factor(Location)) %>% 
   ggplot() + 
@@ -332,15 +330,15 @@ p1 <- dub_how_ark_monthly %>% filter(Location == "Dublin_mlw" |
   theme(
     axis.text.x = element_text(size = 10, angle = 45 ,face = "bold", margin = margin(t = 6)),
     axis.text.y = element_text(size = 10, face = "bold", margin = margin(t = 6)),
-    legend.text = element_text(family = "Serif",size = 10, face = "bold"),
+    legend.text = element_text(family = "Arial",size = 10, face = "bold"),
     legend.title = element_text(size = 15, face = "bold"),
     legend.spacing.x = unit(1,"cm"),
-    axis.title.y = element_text(family = "Serif",size = 10, face = "bold"),
-    axis.title.x = element_text(family = "Serif",size = 10, face = "bold", 
+    axis.title.y = element_text(family = "Arial",size = 10, face = "bold"),
+    axis.title.x = element_text(family = "Arial",size = 10, face = "bold", 
                                 margin = margin(t = 10, r = 0, b = 0, l = 0)))
 
 # ======================== MSL
-p2 <- dub_how_ark_monthly %>% filter(Location == "Dublin_msl" |
+p_2_2 <- dub_how_ark_monthly %>% filter(Location == "Dublin_msl" |
                                        Location == "Arklow_msl" ) %>%
   mutate(Location = as.factor(Location)) %>% 
   ggplot() + 
@@ -356,14 +354,14 @@ p2 <- dub_how_ark_monthly %>% filter(Location == "Dublin_msl" |
   theme(
     axis.text.x = element_text(size = 10, face = "bold", margin = margin(t = 6)),
     axis.text.y = element_text(size = 10, face = "bold", margin = margin(t = 6)),
-    legend.text = element_text( family = "Serif",size = 10, face = "bold"),
+    legend.text = element_text( family = "Arial",size = 10, face = "bold"),
     legend.title = element_text(size = 15, face = "bold"),
     legend.box.margin = margin(1, 20, 1, 1),
-    axis.title.y = element_text(family = "Serif",size = 10, face = "bold"),
-    axis.title.x = element_text(family = "Serif",size = 10, face = "bold"))
+    axis.title.y = element_text(family = "Arial",size = 10, face = "bold"),
+    axis.title.x = element_text(family = "Arial",size = 10, face = "bold"))
 
 # ======================== MHW
-p3 <- dub_how_ark_monthly %>% filter(Location == "Dublin_mhw" |
+p_2_3 <- dub_how_ark_monthly %>% filter(Location == "Dublin_mhw" |
                                        Location == "Arklow_mhw" ) %>%
   mutate(Location = as.factor(Location)) %>% 
   ggplot() + 
@@ -379,11 +377,11 @@ p3 <- dub_how_ark_monthly %>% filter(Location == "Dublin_mhw" |
   theme(
     axis.text.x = element_text(size = 10 ,face = "bold", margin = margin(t = 6)),
     axis.text.y = element_text(size = 10, face = "bold", margin = margin(t = 6)),
-    legend.text = element_text(family = "Serif",size = 10, face = "bold"),
+    legend.text = element_text(family = "Arial",size = 10, face = "bold"),
     legend.title = element_text(size = 15, face = "bold"),
     legend.box.margin = margin(1, 20, 1, 1),
-    axis.title.y = element_text(family = "Serif",size = 10, face = "bold"),
-    axis.title.x = element_text(family = "Serif",size = 10, face = "bold"))
+    axis.title.y = element_text(family = "Arial",size = 10, face = "bold"),
+    axis.title.x = element_text(family = "Arial",size = 10, face = "bold"))
 
 fig_dub_ark <- ggarrange(p3 + rremove("x.text"), p2 + rremove("x.text"), p1 , 
                          ncol = 1, nrow = 3,
@@ -393,7 +391,6 @@ fig_dub_ark <- ggarrange(p3 + rremove("x.text"), p2 + rremove("x.text"), p1 ,
 fig_dub_ark_howth <- ggarrange(fig_dub_ark + rremove("x.text"), fig_dub_howth + rremove("x.text"), 
                                ncol = 2, nrow = 1)
 
-#annotate_figure(test, bottom = text_grob("Time", family = "Serif", size = 10, face = "bold"))
 # ================ Calculating rate differences among Dublin-Howth-Arklow (DHA) ==============
 df_for_rates_DHA <- full_join(dublin_monthly, arklow_monthly) %>% 
   left_join(.,howth_monthly) %>% 
@@ -478,7 +475,7 @@ brest_yearly <- brest_hour %>%
   summarise(brest_mlw = mean(mlw, na.rm = T),
             brest_mhw = mean(mhw, na.rm = T)) %>%
   ungroup() %>% 
-  right_join(irish_sea_2[,c(1,18)]) %>% 
+  right_join(newlyn_brest) %>% 
   rename(brest_msl = Brest) %>% 
   select(year, brest_mlw, brest_msl,brest_mhw)
 
@@ -495,7 +492,7 @@ newlyn_yearly <- newlyn_hour %>%
   summarise(newlyn_mlw = mean(mlw, na.rm=T),
             newlyn_mhw = mean(mhw, na.rm=T)) %>% 
   ungroup() %>% 
-  right_join(irish_sea_2[,c(1,17)]) %>% 
+  right_join(newlyn_brest) %>% 
   rename(newlyn_msl = Newlyn) %>% 
   select(year, newlyn_mlw, newlyn_msl, newlyn_mhw)
 
@@ -531,11 +528,11 @@ fig_dub_bre_new <- dub_new_bre_yearly %>% select(year, newlyn_msl, brest_msl, du
   theme(
     axis.text.x = element_text(size = 10, face = "bold", margin = margin(t = 6)),
     axis.text.y = element_text(size = 10, face = "bold", margin = margin(t = 6)),
-    legend.text = element_text( family = "Serif",size = 10, face = "bold"),
+    legend.text = element_text( family = "Arial",size = 10, face = "bold"),
     legend.title = element_text(size = 15, face = "bold"),
     legend.box.margin = margin(1, 20, 1, 1),
-    axis.title.y = element_text(family = "Serif",size = 10, face = "bold"),
-    axis.title.x = element_text(family = "Serif",size = 10, face = "bold")) 
+    axis.title.y = element_text(family = "Arial",size = 10, face = "bold"),
+    axis.title.x = element_text(family = "Arial",size = 10, face = "bold")) 
 
 
 # ================ Predicting Dublin MSL from MLW in JAGS =================== 
@@ -557,15 +554,6 @@ model
     beta_4 * sin(2 * pi * year[i] / (4.4)) + 
     beta_5 * cos(2 * pi * year[i] / (4.4)) 
     
-    
-    # beta_3 * cos(sin(2 * pi * year[i] / (18.6))) + 
-    # beta_4 * sin(pi * year[i] / (18.6)) + 
-    # beta_5 * cos(sin(pi * year[i] / (18.6))) + 
-    # beta_6 * sin(3 * pi * year[i] / (18.6)) +
-    # beta_7 * cos(sin(3 * pi * year[i] / (18.6))) +
-    # beta_8 * sin(5 * pi * year[i] / (18.6)) +
-    # beta_9 * cos(sin(5 * pi * year[i] / (18.6)))
-    
     y_pred[i] ~ dnorm(mu[i], sigma^-2)  
   }
   # Priors
@@ -575,10 +563,6 @@ model
   beta_3 ~ dnorm(0, 100^-2)
   beta_4 ~ dnorm(0, 100^-2)
   beta_5 ~ dnorm(0, 100^-2)
-  # beta_6 ~ dnorm(0, 100^-2)
-  # beta_7 ~ dnorm(0, 100^-2)
-  # beta_8 ~ dnorm(0, 100^-2)
-  # beta_9 ~ dnorm(0, 100^-2)
   sigma ~ dunif(0, 10)
 }
 "  
@@ -657,11 +641,11 @@ fig_newdub_ark_how <- ggplot() +
   theme(
     axis.text.x = element_text(size = 10, face = "bold", margin = margin(t = 6)),
     axis.text.y = element_text(size = 10, face = "bold", margin = margin(t = 6)),
-    legend.text = element_text( family = "Serif",size = 10, face = "bold"),
+    legend.text = element_text( family = "Arial",size = 10, face = "bold"),
     legend.title = element_text(size = 15, face = "bold"),
     legend.box.margin = margin(1, 20, 1, 1),
-    axis.title.y = element_text(family = "Serif",size = 10, face = "bold"),
-    axis.title.x = element_text(family = "Serif",size = 10, face = "bold")) 
+    axis.title.y = element_text(family = "Arial",size = 10, face = "bold"),
+    axis.title.x = element_text(family = "Arial",size = 10, face = "bold")) 
 
 
 
@@ -687,19 +671,6 @@ df_y_corrected <- atmospheric_corrected_values %>% mutate(time = atmo_data$year)
                                                                                                   -time)
 
 
-fig_dub_withoutATMO <- ggplot() +
-  geom_line(data = df_y_corrected, aes(x = time, y = response, 
-                                       group = index, linetype = "Posterior Predictive"), color = "#004D95",
-            size = 1/4, alpha = 1/4) +
-  geom_line(data = mu_mean_corrected, aes(year, pred_correct, linetype = "Predicted"), color = "blue", size = 1) + 
-  scale_x_continuous(breaks = seq(min(df_y_corrected$time), max(df_y_corrected$time), 5)) +
-  scale_linetype_manual(name = "", values = c(1,1), 
-                        guide = guide_legend(override.aes = 
-                                               list(color = c("#004D95", "blue"),
-                                                    linetype = c("solid", "solid")))) +
-  labs(y = "Mean Sea Level (m)", x = "Time")  +
-  theme_classic()
-
 # ========= Extracting New Dublin data uncertainty after ===================
 # ========= removing atmospheric effects(Epistemic + Aleatory) ============= 
 
@@ -709,7 +680,8 @@ newdata_variance <- df_y_corrected %>% #To be counted for atmospheric removal mo
 
 # ========= Estimating Dublin's SLR rate and measure its uncertainity ===================
 mu_mean_corrected_for_rate <- mu_mean_corrected %>% 
-  filter(year > 1996) %>% left_join(.,newdata_variance)
+  filter(year > 1996) %>% # Select the period for SLR rate calculation 
+  left_join(.,newdata_variance)
 
 model_code <- "
  model
@@ -719,20 +691,13 @@ model_code <- "
   
   y[i] ~ dnorm(mu[i], (sigma^2 + known_sigma[i]^2)^-1)
    
-   mu[i] <- alpha + beta_1* year[i] +
-    beta_2 * sin(2 * pi * year[i] / (18.6)) +
-    beta_3 * cos(2 * pi * year[i] / (18.6)) +
-    beta_4 * sin(2 * pi * year[i] / (4.4)) +
-    beta_5 * cos(2 * pi * year[i] / (4.4))
+   mu[i] <- alpha + beta_1* year[i] 
     
   }
   # Priors
   alpha ~ dnorm(0, 100^-2)
   beta_1 ~ dnorm(0, 100^-2)
-  beta_2 ~ dnorm(0, 100^-2)
-  beta_3 ~ dnorm(0, 100^-2)
-  beta_4 ~ dnorm(0, 100^-2)
-  beta_5 ~ dnorm(0, 100^-2)
+
   sigma ~ dunif(0, 10)
  }
  "  
@@ -740,8 +705,7 @@ model_code <- "
 model_data <- list(N = nrow(mu_mean_corrected_for_rate), 
                    y = mu_mean_corrected_for_rate$pred_correct, 
                    year = mu_mean_corrected_for_rate$year,
-                   known_sigma = mu_mean_corrected_for_rate$std,
-                   pi = pi
+                   known_sigma = mu_mean_corrected_for_rate$std
 )
 
 # Choose the parameters to watch
@@ -755,7 +719,7 @@ model_run <- jags(
 )
 
 slr_rate <- model_run$BUGSoutput$sims.list$beta_1 * 1000 #convert to millimeter
-dublin_rate <- quantile(slr_rate, probs = c(0.05,.5,.95))
+dublin_rate <- round(quantile(slr_rate, probs = c(0.05,.5,.95)),1)
 
 
 # ========= Estimating SLR rates of Brest and Newlyn ===================
@@ -774,7 +738,8 @@ lm.fit <- lm(corrected_dub_new_brest$brest_msl ~ corrected_dub_new_brest$brest_u
 corrected_dub_new_brest$brest_corrected <- c(NA,NA,NA,NA, lm.fit$residuals)
 corrected_dub_new_brest$dublin_corrected <- mu_mean_corrected$pred_correct
 
-corrected_new_brest_for_rate <- corrected_dub_new_brest %>% filter(year > 1996)
+corrected_new_brest_for_rate <- corrected_dub_new_brest %>% 
+  filter(year > 1996) # Select the period for SLR rate calculation 
 
 # ========= Brest
 model_code <- "
@@ -785,28 +750,20 @@ model_code <- "
   
   y[i] ~ dnorm(mu[i], sigma^-2)
    
-   mu[i] <- alpha + beta_1* year[i] +
-    beta_2 * sin(2 * pi * year[i] / (18.6)) +
-    beta_3 * cos(2 * pi * year[i] / (18.6)) +
-    beta_4 * sin(2 * pi * year[i] / (4.4)) +
-    beta_5 * cos(2 * pi * year[i] / (4.4))
+   mu[i] <- alpha + beta_1* year[i] 
     
   }
   # Priors
   alpha ~ dnorm(0, 100^-2)
   beta_1 ~ dnorm(0, 100^-2)
-  beta_2 ~ dnorm(0, 100^-2)
-  beta_3 ~ dnorm(0, 100^-2)
-  beta_4 ~ dnorm(0, 100^-2)
-  beta_5 ~ dnorm(0, 100^-2)
+
   sigma ~ dunif(0, 10)
  }
  "  
 # In this step the inputs should be chnged for each location 
 model_data <- list(N = nrow(corrected_new_brest_for_rate), 
                    y = corrected_new_brest_for_rate$brest_corrected, 
-                   year = corrected_new_brest_for_rate$year,
-                   pi = pi
+                   year = corrected_new_brest_for_rate$year
 )
 
 # Choose the parameters to watch
@@ -820,7 +777,7 @@ model_run <- jags(
 )
 
 slr_rate <- model_run$BUGSoutput$sims.list$beta_1 * 1000 #convert to millimeter
-brest_rate <- quantile(slr_rate, probs = c(0.05,.5,.95))
+brest_rate <- round(quantile(slr_rate, probs = c(0.05,.5,.95)),1)
 
 # ========= Newlyn
 model_code <- "
@@ -831,28 +788,20 @@ model_code <- "
   
   y[i] ~ dnorm(mu[i], sigma^-2)
    
-   mu[i] <- alpha + beta_1* year[i] +
-    beta_2 * sin(2 * pi * year[i] / (18.6)) +
-    beta_3 * cos(2 * pi * year[i] / (18.6)) +
-    beta_4 * sin(2 * pi * year[i] / (4.4)) +
-    beta_5 * cos(2 * pi * year[i] / (4.4))
+   mu[i] <- alpha + beta_1* year[i] 
     
   }
   # Priors
   alpha ~ dnorm(0, 100^-2)
   beta_1 ~ dnorm(0, 100^-2)
-  beta_2 ~ dnorm(0, 100^-2)
-  beta_3 ~ dnorm(0, 100^-2)
-  beta_4 ~ dnorm(0, 100^-2)
-  beta_5 ~ dnorm(0, 100^-2)
+
   sigma ~ dunif(0, 10)
  }
  "  
 # In this step the inputs should be chnged for each location 
 model_data <- list(N = nrow(corrected_new_brest_for_rate), 
                    y = corrected_new_brest_for_rate$newlyn_corrected, 
-                   year = corrected_new_brest_for_rate$year,
-                   pi = pi
+                   year = corrected_new_brest_for_rate$year
 )
 
 # Choose the parameters to watch
@@ -866,13 +815,15 @@ model_run <- jags(
 )
 
 slr_rate <- model_run$BUGSoutput$sims.list$beta_1 * 1000 #convert to millimeter
-newlyn_rate <- quantile(slr_rate, probs = c(0.05,.5,.95))
+newlyn_rate <- round(quantile(slr_rate, probs = c(0.05,.5,.95)),1)
 
 rates <- rbind(`Dublin port` = dublin_rate, Newlyn = newlyn_rate, Brest = brest_rate)
 
 # ========= Plotting Corrected Dublin VS Brest VS Newlyn ===================
 
-fig_corrected_DBN <- corrected_dub_new_brest %>% select(year, newlyn_corrected, brest_corrected, dublin_corrected) %>% 
+fig_corrected_DBN <- corrected_dub_new_brest %>% 
+  filter(year > 1952) %>% 
+  select(year, newlyn_corrected, brest_corrected, dublin_corrected) %>% 
   pivot_longer(names_to = "Location",
                values_to = "msl",
                -year) %>% 
@@ -885,9 +836,8 @@ fig_corrected_DBN <- corrected_dub_new_brest %>% select(year, newlyn_corrected, 
   theme(
     axis.text.x = element_text(size = 10, face = "bold", margin = margin(t = 6)),
     axis.text.y = element_text(size = 10, face = "bold", margin = margin(t = 6)),
-    legend.text = element_text( family = "Serif",size = 10, face = "bold"),
+    legend.text = element_text( family = "Arial",size = 10, face = "bold"),
     legend.title = element_text(size = 15, face = "bold"),
     legend.box.margin = margin(1, 20, 1, 1),
-    axis.title.y = element_text(family = "Serif",size = 10, face = "bold"),
-    axis.title.x = element_text(family = "Serif",size = 10, face = "bold")) 
-
+    axis.title.y = element_text(family = "Arial",size = 10, face = "bold"),
+    axis.title.x = element_text(family = "Arial",size = 10, face = "bold")) 
