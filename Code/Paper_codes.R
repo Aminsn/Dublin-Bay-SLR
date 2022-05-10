@@ -591,6 +591,7 @@ df_y <- df_y_wide %>% mutate(time = df_jags$year) %>% pivot_longer(names_to = "i
                                                                    -time)
 
 mu_mean <- data.frame(pred = model_run$BUGSoutput$mean$mu, year = df_jags$year)
+#write.csv(mu_mean, row.names =  F,"a_newly_reconciled_Dublin_msl_1938_to_2016.csv")
 
 
 # ================ Plotting Dublin's new MSL & Howth and Arklow =================== 
