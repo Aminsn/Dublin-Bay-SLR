@@ -235,8 +235,8 @@ dub_how_ark_monthly <- dublin_monthly %>% select(-dyear) %>%
 # ======================== MLW
 dublin_geom_smooth <- dublin_monthly %>% filter(time >= min(howth_monthly$time)) #Matching time intervals
 p_1_1 <- dub_how_ark_monthly %>% filter(Location == "Dublin_mlw" |
-                                       Location == "Howth_mlw" ,
-                                     time >= min(howth_monthly$time)) %>%
+                                          Location == "Howth_mlw" ,
+                                        time >= min(howth_monthly$time)) %>%
   mutate(Location = as.factor(Location)) %>% 
   ggplot() + 
   geom_line(aes(time, Meter, color = forcats::fct_rev(Location)), size = 1) +
@@ -261,8 +261,8 @@ p_1_1 <- dub_how_ark_monthly %>% filter(Location == "Dublin_mlw" |
 
 # ======================== MSL
 p_1_2 <- dub_how_ark_monthly %>% filter(Location == "Dublin_msl" |
-                                       Location == "Howth_msl" ,
-                                     time >= min(howth_monthly$time)) %>%
+                                          Location == "Howth_msl" ,
+                                        time >= min(howth_monthly$time)) %>%
   mutate(Location = as.factor(Location)) %>% 
   ggplot() + 
   geom_line(aes(time, Meter, color = forcats::fct_rev(Location)), size = 1) +
@@ -285,8 +285,8 @@ p_1_2 <- dub_how_ark_monthly %>% filter(Location == "Dublin_msl" |
 
 # ======================== MHW
 p_1_3 <- dub_how_ark_monthly %>% filter(Location == "Dublin_mhw" |
-                                       Location == "Howth_mhw" ,
-                                     time >= min(howth_monthly$time)) %>%
+                                          Location == "Howth_mhw" ,
+                                        time >= min(howth_monthly$time)) %>%
   mutate(Location = as.factor(Location)) %>% 
   ggplot() + 
   geom_line(aes(time, Meter, color = forcats::fct_rev(Location)), size = 1) +
@@ -315,7 +315,7 @@ fig_dub_howth <- ggarrange(p_1_3 + rremove("x.text"), p_1_2 + rremove("x.text"),
 # ======================== Plotting Dublin VS Arklow ======================== 
 # ======================== MLW
 p_2_1 <- dub_how_ark_monthly %>% filter(Location == "Dublin_mlw" |
-                                       Location == "Arklow_mlw") %>%
+                                          Location == "Arklow_mlw") %>%
   mutate(Location = as.factor(Location)) %>% 
   ggplot() + 
   geom_line(aes(time, Meter, color = Location), size = 1) +
@@ -339,7 +339,7 @@ p_2_1 <- dub_how_ark_monthly %>% filter(Location == "Dublin_mlw" |
 
 # ======================== MSL
 p_2_2 <- dub_how_ark_monthly %>% filter(Location == "Dublin_msl" |
-                                       Location == "Arklow_msl" ) %>%
+                                          Location == "Arklow_msl" ) %>%
   mutate(Location = as.factor(Location)) %>% 
   ggplot() + 
   geom_line(aes(time, Meter, color = Location), size = 1) +
@@ -362,7 +362,7 @@ p_2_2 <- dub_how_ark_monthly %>% filter(Location == "Dublin_msl" |
 
 # ======================== MHW
 p_2_3 <- dub_how_ark_monthly %>% filter(Location == "Dublin_mhw" |
-                                       Location == "Arklow_mhw" ) %>%
+                                          Location == "Arklow_mhw" ) %>%
   mutate(Location = as.factor(Location)) %>% 
   ggplot() + 
   geom_line(aes(time, Meter, color = Location), size = 1) +
@@ -383,7 +383,7 @@ p_2_3 <- dub_how_ark_monthly %>% filter(Location == "Dublin_mhw" |
     axis.title.y = element_text(family = "Arial",size = 10, face = "bold"),
     axis.title.x = element_text(family = "Arial",size = 10, face = "bold"))
 
-fig_dub_ark <- ggarrange(p3 + rremove("x.text"), p2 + rremove("x.text"), p1 , 
+fig_dub_ark <- ggarrange(p_2_3 + rremove("x.text"), p_2_2 + rremove("x.text"), p_2_1 , 
                          ncol = 1, nrow = 3,
                          common.legend = TRUE, legend = "top")
 
@@ -698,7 +698,6 @@ model_code <- "
   # Priors
   alpha ~ dnorm(0, 100^-2)
   beta_1 ~ dnorm(0, 100^-2)
-
   sigma ~ dunif(0, 10)
  }
  "  
@@ -757,7 +756,6 @@ model_code <- "
   # Priors
   alpha ~ dnorm(0, 100^-2)
   beta_1 ~ dnorm(0, 100^-2)
-
   sigma ~ dunif(0, 10)
  }
  "  
@@ -795,7 +793,6 @@ model_code <- "
   # Priors
   alpha ~ dnorm(0, 100^-2)
   beta_1 ~ dnorm(0, 100^-2)
-
   sigma ~ dunif(0, 10)
  }
  "  
@@ -842,3 +839,61 @@ fig_corrected_DBN <- corrected_dub_new_brest %>%
     legend.box.margin = margin(1, 20, 1, 1),
     axis.title.y = element_text(family = "Arial",size = 10, face = "bold"),
     axis.title.x = element_text(family = "Arial",size = 10, face = "bold")) 
+
+# ---------------- Appendix: Change point model -----------------------------
+# Calculating the abs difference between Dublin & Newlyn
+df <- dub_new_bre_yearly %>% mutate(diff = abs(dublin_msl - newlyn_msl))
+
+# Jags code ---------------------------------------------------------------
+# Code for DCPR-1
+model_code_DCPR_1 <- "
+model
+{
+  # Likelihood
+  for(i in 1:T) {
+    y[i] ~ dnorm(mu[i], tau)
+    mu[i] <- alpha[J[i]]
+    J[i] <- 1 + step(t[i] - t_1)
+  }
+  # Priors
+  alpha[1] ~ dnorm(0.0, 0.01)
+  alpha[2] ~ dnorm(0.0, 0.01)
+  t_1 ~ dunif(t_min, t_max)
+  tau <- 1/pow(sigma, 2)
+  sigma ~ dunif(0, 100)
+}
+"
+
+# Parameters to watch
+model_parameters <- c("t_1", "alpha", "sigma")
+
+model_data <- list(t = df$year, 
+                   y = df$diff, 
+                   T = nrow(df), 
+                   t_min = min(df$year), 
+                   t_max = max(df$year))
+
+# Run the model
+model_run <- jags(
+  data = model_data,
+  parameters.to.save = model_parameters,
+  model.file = textConnection(model_code_DCPR_1),
+  n.chains = 4, # Number of different starting positions
+  n.iter = 1e5, # Number of iterations
+  n.burnin = 1e4, # Number of iterations to remove at start
+  n.thin = 9
+)
+
+t_1 <- mean(model_run$BUGSoutput$sims.list$t_1)
+
+# Plot the data with the estimated change point
+model_data %>%
+  as.data.frame() %>% 
+  ggplot() + 
+  geom_point(aes(t,y)) +
+  geom_vline(xintercept = floor(t_1), color = "Red") +
+  scale_x_continuous(breaks = c(1938,1976,2016)) +
+  labs(x = "Time", y = "Absolute diff. (m)") +
+  theme_bw()
+
+
